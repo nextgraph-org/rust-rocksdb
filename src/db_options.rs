@@ -2446,6 +2446,10 @@ impl Options {
                 options.bloom_bits_per_key,
                 options.hash_table_ratio,
                 options.index_sparseness,
+                0,
+                0,
+                0,
+                0,
             );
         }
     }
