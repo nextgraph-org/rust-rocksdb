@@ -55,14 +55,14 @@ fn build_rocksdb() {
 
     if cfg!(feature = "snappy") {
         config.define("SNAPPY", Some("1"));
-        config.include("snappy/");
+        if let Some(path) = env::var_os("DEP_SNAPPY_INCLUDE") {
+            config.include(path);
+        }
     }
 
     if cfg!(feature = "lz4") {
         config.define("LZ4", Some("1"));
-        if let Some(path) = env::var_os("DEP_LZ4_INCLUDE") {
-            config.include(path);
-        }
+        config.include("lz4/");
     }
 
     if cfg!(feature = "zstd") {
