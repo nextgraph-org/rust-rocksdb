@@ -53,6 +53,7 @@ fn build_rocksdb() {
     config.include("rocksdb/include/");
     config.include("rocksdb/");
     config.include("rocksdb/third-party/gtest-1.8.1/fused-src/");
+    config.include("rocksdb/plugin/ippcp/library/include");
 
     if cfg!(feature = "snappy") {
         config.define("SNAPPY", Some("1"));
@@ -102,71 +103,95 @@ fn build_rocksdb() {
         .filter(|file| !matches!(*file, "util/build_version.cc"))
         .collect::<Vec<&'static str>>();
 
-    if let (true, Ok(target_feature_value)) = (
+    if let (true, Ok(_target_feature_value)) = (
         target.contains("x86_64"),
         env::var("CARGO_CFG_TARGET_FEATURE"),
     ) {
         // This is needed to enable hardware CRC32C. Technically, SSE 4.2 is
         // only available since Intel Nehalem (about 2010) and AMD Bulldozer
         // (about 2011).
-        let target_features: Vec<_> = target_feature_value.split(',').collect();
+        // let target_features: Vec<_> = target_feature_value.split(',').collect();
 
-        if target_features.contains(&"sse2") {
-            config.flag_if_supported("-msse2");
-        }
-        if target_features.contains(&"sse4.1") {
-            config.flag_if_supported("-msse4.1");
-        }
-        if target_features.contains(&"sse4.2") {
-            config.flag_if_supported("-msse4.2");
-        }
-        // Pass along additional target features as defined in
-        // build_tools/build_detect_platform.
-        if target_features.contains(&"avx2") {
-            config.flag_if_supported("-mavx2");
-        }
-        if target_features.contains(&"bmi1") {
-            config.flag_if_supported("-mbmi");
-        }
-        if target_features.contains(&"lzcnt") {
-            config.flag_if_supported("-mlzcnt");
-        }
-        if !target.contains("android") && target_features.contains(&"pclmulqdq") {
-            config.flag_if_supported("-mpclmul");
-        }
+        // if target_features.contains(&"sse2") {
+        //     config.flag_if_supported("-msse2");
+        // }
+        // if target_features.contains(&"sse4.1") {
+        //     config.flag_if_supported("-msse4.1");
+        // }
+        // if target_features.contains(&"sse4.2") {
+        //     config.flag_if_supported("-msse4.2");
+        // }
+        // // Pass along additional target features as defined in
+        // // build_tools/build_detect_platform.
+        // if target_features.contains(&"avx2") {
+        //     config.flag_if_supported("-mavx2");
+        // }
+        // if target_features.contains(&"bmi1") {
+        //     config.flag_if_supported("-mbmi");
+        // }
+        // if target_features.contains(&"lzcnt") {
+        //     config.flag_if_supported("-mlzcnt");
+        // }
+        // if !target.contains("android") && target_features.contains(&"pclmulqdq") {
+        //     config.flag_if_supported("-mpclmul");
+        // }
+
+        // We want a portable library that can run on any x86_64.
+        // but we optimize for haswell which supports
+        // many or most of the available optimizations while still being compatible with
+        // most processors made since roughly 2013.
+        // if this becomes a problem for some app installers with older hardware, a special install
+        // file should be generated with a lib compiled without this flag
+        config.flag("-march=haswell");
     }
 
     if target.contains("apple-ios") {
         config.define("OS_MACOSX", None);
-
         config.define("IOS_CROSS_COMPILE", None);
         config.define("PLATFORM", "IOS");
         config.define("NIOSTATS_CONTEXT", None);
         config.define("NPERF_CONTEXT", None);
         config.define("ROCKSDB_PLATFORM_POSIX", None);
         config.define("ROCKSDB_LIB_IO_POSIX", None);
-
         env::set_var("IPHONEOS_DEPLOYMENT_TARGET", "12.0");
     } else if target.contains("darwin") {
         config.define("OS_MACOSX", None);
         config.define("ROCKSDB_PLATFORM_POSIX", None);
         config.define("ROCKSDB_LIB_IO_POSIX", None);
+        println!("cargo:rustc-link-arg=-mmacosx-version-min=10.14");
+        config.flag("-Wshorten-64-to-32");
+        config.flag("-mmacosx-version-min=10.14");
+        config.define("DHAVE_FULLFSYNC", None);
+        config.define("HAVE_UINT128_EXTENSION", None);
+        config.flag_if_supported("-faligned-new");
+        config.define("AVE_ALIGNED_NEW", None);
     } else if target.contains("android") {
         config.define("OS_ANDROID", None);
         config.define("ROCKSDB_PLATFORM_POSIX", None);
         config.define("ROCKSDB_LIB_IO_POSIX", None);
+        config.define("_REENTRANT", None);
+        config.flag("-fno-builtin-memcmp");
     } else if target.contains("linux") {
         config.define("OS_LINUX", None);
         config.define("ROCKSDB_PLATFORM_POSIX", None);
         config.define("ROCKSDB_LIB_IO_POSIX", None);
+        println!("cargo:rustc-link-arg=-lpthread");
+        println!("cargo:rustc-link-arg=-lrt");
+        println!("cargo:rustc-link-arg=-ldl");
     } else if target.contains("freebsd") {
         config.define("OS_FREEBSD", None);
         config.define("ROCKSDB_PLATFORM_POSIX", None);
         config.define("ROCKSDB_LIB_IO_POSIX", None);
+        println!("cargo:rustc-link-arg=-lpthread");
+        config.flag("-fno-builtin-memcmp");
+        config.define("_REENTRANT", None);
     } else if target.contains("openbsd") {
         config.define("OS_OPENBSD", None);
         config.define("ROCKSDB_PLATFORM_POSIX", None);
         config.define("ROCKSDB_LIB_IO_POSIX", None);
+        println!("cargo:rustc-link-arg=-pthread");
+        config.flag("-fno-builtin-memcmp");
+        config.define("_REENTRANT", None);
     } else if target.contains("windows") {
         link("rpcrt4", false);
         link("shlwapi", false);
@@ -237,7 +262,15 @@ fn build_rocksdb() {
     if target.contains("msvc") {
         config.flag("-EHsc");
         config.flag("-std:c++17");
+        //  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zi /nologo /EHsc /GS /Gd /GR /GF /fp:precise /Zc:wchar_t /Zc:forScope /errorReport:queue")
+        // set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /FC /d2Zi+ /W4 /wd4127 /wd4800 /wd4996 /wd4351 /wd4100 /wd4204 /wd4324")
     } else {
+        if target.contains("x86_64") {
+            config.flag("-Wstrict-prototypes");
+        }
+        //-W -Wextra -Wall -pthread
+        //-fno-omit-frame-pointer
+        //-momit-leaf-frame-pointer
         config.flag(&cxx_standard());
         // matches the flags in CMakeLists.txt from rocksdb
         config.flag("-Wsign-compare");
@@ -260,6 +293,16 @@ fn build_rocksdb() {
 
     config.cpp(true);
     config.flag_if_supported("-std=c++17");
+
+    let dir = env::var("CARGO_MANIFEST_DIR").unwrap();
+    println!(
+        "cargo:rustc-link-search=native={}",
+        Path::new(&dir)
+            .join("rocksdb/plugin/ippcp/library/lib")
+            .display()
+    );
+    println!("cargo:rustc-link-lib=static=ippcp");
+
     config.compile("librocksdb.a");
 }
 
@@ -351,7 +394,7 @@ fn main() {
     }
     let target = env::var("TARGET").unwrap();
     if target.contains("openbsd") {
-        env::set_var("LIBCLANG_PATH","/usr/local/lib");
+        env::set_var("LIBCLANG_PATH", "/usr/local/lib");
     }
 
     bindgen_rocksdb();
