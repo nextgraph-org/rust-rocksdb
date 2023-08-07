@@ -347,6 +347,11 @@ fn main() {
     if !Path::new("rocksdb/AUTHORS").exists() {
         update_submodules();
     }
+    let target = env::var("TARGET").unwrap();
+    if target.contains("openbsd") {
+        env::set_var("LIBCLANG_PATH","/usr/local/lib");
+    }
+
     bindgen_rocksdb();
 
     if !try_to_find_and_link_lib("ROCKSDB") {

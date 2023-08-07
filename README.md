@@ -14,6 +14,12 @@ rust-rocksdb
 
 - Clang and LLVM
 
+### On OpenBSD
+
+```
+pkg_add llvm
+```
+
 ## Contributing
 
 Feedback and pull requests welcome!  If a particular feature of RocksDB is 
