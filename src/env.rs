@@ -1,6 +1,7 @@
 use std::sync::Arc;
 
-use libc::{self, c_int};
+use crate::ffi_util::from_cstr;
+use libc::{self, c_char, c_int};
 
 use crate::{ffi, Error};
 
@@ -30,6 +31,14 @@ impl Drop for EnvWrapper {
 }
 
 impl Env {
+    pub fn version() -> String {
+        unsafe {
+            let ptr: *const c_char = ffi::rocksdb_version();
+            let s = from_cstr(ptr);
+            s
+        }
+    }
+
     /// Returns default env
     pub fn new() -> Result<Self, Error> {
         let env = unsafe { ffi::rocksdb_create_default_env() };
