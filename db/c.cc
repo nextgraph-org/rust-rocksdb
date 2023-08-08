@@ -46,6 +46,7 @@
 #include "rocksdb/utilities/write_batch_with_index.h"
 #include "rocksdb/write_batch.h"
 #include "utilities/merge_operators.h"
+#include "rocksdb/env_encryption.h"
 
 using ROCKSDB_NAMESPACE::BackupEngine;
 using ROCKSDB_NAMESPACE::BackupEngineOptions;
@@ -4870,6 +4871,20 @@ void rocksdb_dbpath_destroy(rocksdb_dbpath_t* dbpath) { delete dbpath; }
 rocksdb_env_t* rocksdb_create_default_env() {
   rocksdb_env_t* result = new rocksdb_env_t;
   result->rep = Env::Default();
+  result->is_default = true;
+  return result;
+}
+
+rocksdb_env_t* rocksdb_create_encrypted_env(const char* key) {
+  rocksdb_env_t* result = new rocksdb_env_t;
+  std::shared_ptr<rocksdb::EncryptionProvider> provider;
+  Status status = rocksdb::EncryptionProvider::CreateFromString(
+      ConfigOptions(), "ippcp", &provider);
+  assert(status.ok());
+  status =
+      provider->AddCipher("", key, 32, false);
+  assert(status.ok());
+  result->rep = NewEncryptedEnv(Env::Default(), provider);
   result->is_default = true;
   return result;
 }

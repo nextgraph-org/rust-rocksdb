@@ -2097,6 +2097,7 @@ extern ROCKSDB_LIBRARY_API void rocksdb_dbpath_destroy(rocksdb_dbpath_t*);
 /* Env */
 
 extern ROCKSDB_LIBRARY_API rocksdb_env_t* rocksdb_create_default_env(void);
+extern ROCKSDB_LIBRARY_API rocksdb_env_t* rocksdb_create_encrypted_env(const char* key);
 extern ROCKSDB_LIBRARY_API rocksdb_env_t* rocksdb_create_mem_env(void);
 extern ROCKSDB_LIBRARY_API void rocksdb_env_set_background_threads(
     rocksdb_env_t* env, int n);
