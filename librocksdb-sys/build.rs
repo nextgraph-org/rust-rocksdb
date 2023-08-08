@@ -266,7 +266,7 @@ fn build_rocksdb() {
         // set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /FC /d2Zi+ /W4 /wd4127 /wd4800 /wd4996 /wd4351 /wd4100 /wd4204 /wd4324")
     } else {
         if target.contains("x86_64") {
-            config.flag("-Wstrict-prototypes");
+            config.flag_if_supported("-Wstrict-prototypes");
         }
         //-W -Wextra -Wall -pthread
         //-fno-omit-frame-pointer

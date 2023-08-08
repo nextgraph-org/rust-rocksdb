@@ -1,5 +1,5 @@
 #include "../rocksdb/include/rocksdb/version.h"
-
+#include <cstring>
 #include "c.h"
 
 static char* CopyString(const std::string& str) {
