@@ -182,9 +182,18 @@ fn build_rocksdb() {
         config.define("OS_LINUX", None);
         config.define("ROCKSDB_PLATFORM_POSIX", None);
         config.define("ROCKSDB_LIB_IO_POSIX", None);
+        config.define("ROCKSDB_FALLOCATE_PRESENT", None);
+        config.define("ROCKSDB_MALLOC_USABLE_SIZE", None);
+        config.define("ROCKSDB_PTHREAD_ADAPTIVE_MUTEX", None);
+        config.define("ROCKSDB_RANGESYNC_PRESENT", None);
+        config.define("ROCKSDB_SCHED_GETCPU_PRESENT", None);
+        config.define("ROCKSDB_AUXV_GETAUXVAL_PRESENT", None);
+        config.define("HAVE_UINT128_EXTENSION", None);
+        config.define("HAVE_ALIGNED_NEW", None);
         println!("cargo:rustc-link-arg=-lpthread");
         println!("cargo:rustc-link-arg=-lrt");
         println!("cargo:rustc-link-arg=-ldl");
+        config.flag("-fno-builtin-memcmp");
         
         let dir = env::var("CARGO_MANIFEST_DIR").unwrap();
   	println!(
