@@ -165,6 +165,13 @@ fn build_rocksdb() {
         config.define("HAVE_UINT128_EXTENSION", None);
         config.flag_if_supported("-faligned-new");
         config.define("AVE_ALIGNED_NEW", None);
+        let dir = env::var("CARGO_MANIFEST_DIR").unwrap();
+  	println!(
+            "cargo:rustc-link-search=native={}",
+                Path::new(&dir)
+                    .join("rocksdb/plugin/ippcp/library/macos/lib")
+                    .display()
+    	);
     } else if target.contains("android") {
         config.define("OS_ANDROID", None);
         config.define("ROCKSDB_PLATFORM_POSIX", None);
@@ -178,6 +185,15 @@ fn build_rocksdb() {
         println!("cargo:rustc-link-arg=-lpthread");
         println!("cargo:rustc-link-arg=-lrt");
         println!("cargo:rustc-link-arg=-ldl");
+        
+        let dir = env::var("CARGO_MANIFEST_DIR").unwrap();
+  	println!(
+            "cargo:rustc-link-search=native={}",
+                Path::new(&dir)
+                    .join("rocksdb/plugin/ippcp/library/linux/lib")
+                    .display()
+    	);
+    println!("cargo:rustc-link-lib=static=ippcp");
     } else if target.contains("freebsd") {
         config.define("OS_FREEBSD", None);
         config.define("ROCKSDB_PLATFORM_POSIX", None);
@@ -293,15 +309,6 @@ fn build_rocksdb() {
 
     config.cpp(true);
     config.flag_if_supported("-std=c++17");
-
-    let dir = env::var("CARGO_MANIFEST_DIR").unwrap();
-    println!(
-        "cargo:rustc-link-search=native={}",
-        Path::new(&dir)
-            .join("rocksdb/plugin/ippcp/library/lib")
-            .display()
-    );
-    println!("cargo:rustc-link-lib=static=ippcp");
 
     config.compile("librocksdb.a");
 }
