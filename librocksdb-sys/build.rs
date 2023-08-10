@@ -235,7 +235,7 @@ fn build_rocksdb() {
                 .join("rocksdb/plugin/ippcp/library/win")
                 .display()
         );
-        println!("cargo:rustc-link-lib=static=ippcp");
+        println!("cargo:rustc-link-lib=static=ippcpmt");
 
         if &target == "x86_64-pc-windows-gnu" {
             // Tell MinGW to create localtime_r wrapper of localtime_s function.
