@@ -421,6 +421,8 @@ fn main() {
     let target = env::var("TARGET").unwrap();
     if target.contains("openbsd") {
         env::set_var("LIBCLANG_PATH", "/usr/local/lib");
+    } else if target.contains("windows") {
+        env::set_var("LIBCLANG_PATH", "C:\\Program Files\\LLVM\\bin");
     }
 
     bindgen_rocksdb();
