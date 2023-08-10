@@ -232,7 +232,7 @@ fn build_rocksdb() {
         println!(
             "cargo:rustc-link-search=native={}",
             Path::new(&dir)
-                .join("rocksdb/plugin/ippcp/library/win/lib")
+                .join("rocksdb/plugin/ippcp/library/win")
                 .display()
         );
         println!("cargo:rustc-link-lib=static=ippcp");
