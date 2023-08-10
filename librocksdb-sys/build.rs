@@ -166,12 +166,13 @@ fn build_rocksdb() {
         config.flag_if_supported("-faligned-new");
         config.define("AVE_ALIGNED_NEW", None);
         let dir = env::var("CARGO_MANIFEST_DIR").unwrap();
-  	println!(
+        println!(
             "cargo:rustc-link-search=native={}",
-                Path::new(&dir)
-                    .join("rocksdb/plugin/ippcp/library/macos/lib")
-                    .display()
-    	);
+            Path::new(&dir)
+                .join("rocksdb/plugin/ippcp/library/macos/lib")
+                .display()
+        );
+        println!("cargo:rustc-link-lib=static=ippcp");
     } else if target.contains("android") {
         config.define("OS_ANDROID", None);
         config.define("ROCKSDB_PLATFORM_POSIX", None);
@@ -194,15 +195,15 @@ fn build_rocksdb() {
         println!("cargo:rustc-link-arg=-lrt");
         println!("cargo:rustc-link-arg=-ldl");
         config.flag("-fno-builtin-memcmp");
-        
+
         let dir = env::var("CARGO_MANIFEST_DIR").unwrap();
-  	println!(
+        println!(
             "cargo:rustc-link-search=native={}",
-                Path::new(&dir)
-                    .join("rocksdb/plugin/ippcp/library/linux/lib")
-                    .display()
-    	);
-    println!("cargo:rustc-link-lib=static=ippcp");
+            Path::new(&dir)
+                .join("rocksdb/plugin/ippcp/library/linux/lib")
+                .display()
+        );
+        println!("cargo:rustc-link-lib=static=ippcp");
     } else if target.contains("freebsd") {
         config.define("OS_FREEBSD", None);
         config.define("ROCKSDB_PLATFORM_POSIX", None);
@@ -226,6 +227,15 @@ fn build_rocksdb() {
         config.define("WIN64", None);
         config.define("NOMINMAX", None);
         config.define("ROCKSDB_WINDOWS_UTF8_FILENAMES", None);
+
+        let dir = env::var("CARGO_MANIFEST_DIR").unwrap();
+        println!(
+            "cargo:rustc-link-search=native={}",
+            Path::new(&dir)
+                .join("rocksdb/plugin/ippcp/library/win/lib")
+                .display()
+        );
+        println!("cargo:rustc-link-lib=static=ippcp");
 
         if &target == "x86_64-pc-windows-gnu" {
             // Tell MinGW to create localtime_r wrapper of localtime_s function.
