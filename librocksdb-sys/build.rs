@@ -230,7 +230,7 @@ fn build_rocksdb() {
         println!("cargo:rustc-link-arg=-pthread");
         config.flag("-fno-builtin-memcmp");
         config.define("_REENTRANT", None);
-        config.include("rocksdb/plugin/openssl/include");
+        config.include("/usr/include");
         lib_sources.push("plugin/openssl/openssl_provider.cc");
         // let dir = env::var("CARGO_MANIFEST_DIR").unwrap();
         println!("cargo:rustc-link-arg=-lcrypto");
