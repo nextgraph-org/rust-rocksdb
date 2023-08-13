@@ -16,7 +16,7 @@ links = "rocksdb"
 default = [ "static" ]
 jemalloc = ["tikv-jemalloc-sys"]
 static = ["libz-sys?/static", "bzip2-sys?/static"]
-io-uring = ["pkg-config"]
+io-uring = []
 snappy = []
 lz4 = ["lz4-sys"]
 zstd = ["zstd-sys"]
@@ -32,7 +32,7 @@ zstd-sys = { version = "2.0", features = ["zdict_builder"], optional = true }
 libz-sys = { version = "1.1", default-features = false, optional = true }
 bzip2-sys = { version = "0.1", default-features = false, optional = true }
 
-[target.'cfg(not(any(target_os = "linux",target_os = "darwin")))'.dependencies.openssl]
+[target.'cfg(not(any(target_os = "linux",target_os = "darwin",target_os = "openbsd")))'.dependencies.openssl]
 version = "0.10"
 features = ["vendored"]
 
@@ -44,4 +44,4 @@ uuid = { version = "1.0", features = ["v4"] }
 cc = { version = "1.0", features = ["parallel"] }
 bindgen = { version = "0.65", default-features = false, features = ["runtime"] }
 glob = "0.3"
-pkg-config = { version = "0.3", optional = true }
+pkg-config = { version = "0.3" }
