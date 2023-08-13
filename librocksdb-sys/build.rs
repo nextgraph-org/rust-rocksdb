@@ -237,6 +237,7 @@ fn build_rocksdb() {
         pkg_config::Config::new().probe("openssl").unwrap();
         // config.include("rocksdb/plugin/openssl/include");
         lib_sources.push("plugin/openssl/openssl_provider.cc");
+        config.flag("-lcrypto");
         // let dir = env::var("CARGO_MANIFEST_DIR").unwrap();
         // println!("cargo:rustc-link-lib=static=crypto");
     } else if target.contains("windows") {
