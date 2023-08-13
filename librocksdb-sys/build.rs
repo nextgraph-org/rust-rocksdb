@@ -144,7 +144,7 @@ fn build_rocksdb() {
         // config.flag("-march=haswell");
         // the flag has been moved to the darwin. openbsd, freebsd and linux cases below
     }
-
+if !target.contains("openbsd") {
     if !target.contains("darwin") && !target.contains("linux") {
         config.include("rocksdb/plugin/openssl/include");
         lib_sources.push("plugin/openssl/openssl_provider.cc");
@@ -169,7 +169,7 @@ fn build_rocksdb() {
         );
         println!("cargo:rustc-link-lib=static=ippcp");
     }
-
+}
     if target.contains("apple-ios") {
         config.define("OS_MACOSX", None);
         config.define("IOS_CROSS_COMPILE", None);
@@ -230,6 +230,10 @@ fn build_rocksdb() {
         println!("cargo:rustc-link-arg=-pthread");
         config.flag("-fno-builtin-memcmp");
         config.define("_REENTRANT", None);
+        config.include("rocksdb/plugin/openssl/include");
+        lib_sources.push("plugin/openssl/openssl_provider.cc");
+        let dir = env::var("CARGO_MANIFEST_DIR").unwrap();
+        println!("cargo:rustc-link-lib=static=crypto");
     } else if target.contains("windows") {
         link("rpcrt4", false);
         link("shlwapi", false);
