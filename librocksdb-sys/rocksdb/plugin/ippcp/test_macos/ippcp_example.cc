@@ -13,7 +13,7 @@
 
 #include <string>
 
-#include "../ippcp_provider.h"
+//#include "../ippcp_provider.h"
 
 using namespace ROCKSDB_NAMESPACE;
 
@@ -26,7 +26,7 @@ int main() {
 
   std::shared_ptr<EncryptionProvider> provider;
   Status status = EncryptionProvider::CreateFromString(
-      ConfigOptions(), IppcpProvider::kName(), &provider);
+      ConfigOptions(), "ippcp", &provider);
   assert(status.ok());
 
   status =

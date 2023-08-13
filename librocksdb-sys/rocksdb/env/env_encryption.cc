@@ -10,6 +10,7 @@
 #include <cassert>
 #include <cctype>
 #include <iostream>
+#include <memory>
 
 #include "env/composite_env_wrapper.h"
 #include "env/env_encryption_ctr.h"
