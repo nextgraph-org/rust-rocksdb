@@ -53,7 +53,6 @@ fn build_rocksdb() {
     config.include("rocksdb/include/");
     config.include("rocksdb/");
     config.include("rocksdb/third-party/gtest-1.8.1/fused-src/");
-    config.include("rocksdb/plugin/ippcp/library/include");
 
     if cfg!(feature = "snappy") {
         config.define("SNAPPY", Some("1"));
@@ -142,7 +141,8 @@ fn build_rocksdb() {
         // most processors made since roughly 2013.
         // if this becomes a problem for some app installers with older hardware, a special install
         // file should be generated with a lib compiled without this flag
-        config.flag("-march=haswell");
+        // config.flag("-march=haswell");
+        // the flag has been moved to the darwin. openbsd, freebsd and linux cases below
     }
 
     if target.contains("apple-ios") {
@@ -155,6 +155,7 @@ fn build_rocksdb() {
         config.define("ROCKSDB_LIB_IO_POSIX", None);
         env::set_var("IPHONEOS_DEPLOYMENT_TARGET", "12.0");
     } else if target.contains("darwin") {
+        config.flag("-march=haswell");
         config.define("OS_MACOSX", None);
         config.define("ROCKSDB_PLATFORM_POSIX", None);
         config.define("ROCKSDB_LIB_IO_POSIX", None);
@@ -165,14 +166,28 @@ fn build_rocksdb() {
         config.define("HAVE_UINT128_EXTENSION", None);
         config.flag_if_supported("-faligned-new");
         config.define("AVE_ALIGNED_NEW", None);
+
+        // on macos we use the IPPCP plugin of rocksdb for the crypto (the lib is precompiled)
+        // config.include("rocksdb/plugin/ippcp/library/include");
+        // lib_sources.push("plugin/ippcp/ippcp_provider.cc");
+        // let dir = env::var("CARGO_MANIFEST_DIR").unwrap();
+        // println!(
+        //     "cargo:rustc-link-search=native={}",
+        //     Path::new(&dir)
+        //         .join("rocksdb/plugin/ippcp/library/macos/lib")
+        //         .display()
+        // );
+        // println!("cargo:rustc-link-lib=static=ippcp");
+        config.include("rocksdb/plugin/openssl/include");
+        lib_sources.push("plugin/openssl/openssl_provider.cc");
         let dir = env::var("CARGO_MANIFEST_DIR").unwrap();
         println!(
-            "cargo:rustc-link-search=native={}",
+            "cargo:rustc-link-search=dependency={}",
             Path::new(&dir)
-                .join("rocksdb/plugin/ippcp/library/macos/lib")
+                //.join("rocksdb/plugin/ippcp/library/macos/lib")
                 .display()
         );
-        println!("cargo:rustc-link-lib=static=ippcp");
+        println!("cargo:rustc-link-lib=static=crypto");
     } else if target.contains("android") {
         config.define("OS_ANDROID", None);
         config.define("ROCKSDB_PLATFORM_POSIX", None);
@@ -180,6 +195,7 @@ fn build_rocksdb() {
         config.define("_REENTRANT", None);
         config.flag("-fno-builtin-memcmp");
     } else if target.contains("linux") {
+        config.flag("-march=haswell");
         config.define("OS_LINUX", None);
         config.define("ROCKSDB_PLATFORM_POSIX", None);
         config.define("ROCKSDB_LIB_IO_POSIX", None);
@@ -196,6 +212,9 @@ fn build_rocksdb() {
         println!("cargo:rustc-link-arg=-ldl");
         config.flag("-fno-builtin-memcmp");
 
+        // on linux we use the IPPCP plugin of rocksdb for the crypto (the lib is precompiled)
+        config.include("rocksdb/plugin/ippcp/library/include");
+        lib_sources.push("plugin/ippcp/ippcp_provider.cc");
         let dir = env::var("CARGO_MANIFEST_DIR").unwrap();
         println!(
             "cargo:rustc-link-search=native={}",
@@ -205,6 +224,7 @@ fn build_rocksdb() {
         );
         println!("cargo:rustc-link-lib=static=ippcp");
     } else if target.contains("freebsd") {
+        config.flag("-march=haswell");
         config.define("OS_FREEBSD", None);
         config.define("ROCKSDB_PLATFORM_POSIX", None);
         config.define("ROCKSDB_LIB_IO_POSIX", None);
@@ -212,6 +232,7 @@ fn build_rocksdb() {
         config.flag("-fno-builtin-memcmp");
         config.define("_REENTRANT", None);
     } else if target.contains("openbsd") {
+        config.flag("-march=haswell");
         config.define("OS_OPENBSD", None);
         config.define("ROCKSDB_PLATFORM_POSIX", None);
         config.define("ROCKSDB_LIB_IO_POSIX", None);
