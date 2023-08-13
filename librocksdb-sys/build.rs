@@ -145,6 +145,31 @@ fn build_rocksdb() {
         // the flag has been moved to the darwin. openbsd, freebsd and linux cases below
     }
 
+    if !target.contains("darwin") && !target.contains("linux") {
+        config.include("rocksdb/plugin/openssl/include");
+        lib_sources.push("plugin/openssl/openssl_provider.cc");
+        let dir = env::var("CARGO_MANIFEST_DIR").unwrap();
+        println!(
+            "cargo:rustc-link-search=dependency={}",
+            Path::new(&dir)
+                //.join("rocksdb/plugin/ippcp/library/macos/lib")
+                .display()
+        );
+        println!("cargo:rustc-link-lib=static=crypto");
+    } else {
+        // on macos and linux we use the IPPCP plugin of rocksdb for the crypto (the lib is precompiled)
+        config.include("rocksdb/plugin/ippcp/library/include");
+        lib_sources.push("plugin/ippcp/ippcp_provider.cc");
+        let dir = env::var("CARGO_MANIFEST_DIR").unwrap();
+        println!(
+            "cargo:rustc-link-search=native={}",
+            Path::new(&dir)
+                .join("rocksdb/plugin/ippcp/library/macos/lib")
+                .display()
+        );
+        println!("cargo:rustc-link-lib=static=ippcp");
+    }
+
     if target.contains("apple-ios") {
         config.define("OS_MACOSX", None);
         config.define("IOS_CROSS_COMPILE", None);
@@ -166,28 +191,6 @@ fn build_rocksdb() {
         config.define("HAVE_UINT128_EXTENSION", None);
         config.flag_if_supported("-faligned-new");
         config.define("AVE_ALIGNED_NEW", None);
-
-        // on macos we use the IPPCP plugin of rocksdb for the crypto (the lib is precompiled)
-        // config.include("rocksdb/plugin/ippcp/library/include");
-        // lib_sources.push("plugin/ippcp/ippcp_provider.cc");
-        // let dir = env::var("CARGO_MANIFEST_DIR").unwrap();
-        // println!(
-        //     "cargo:rustc-link-search=native={}",
-        //     Path::new(&dir)
-        //         .join("rocksdb/plugin/ippcp/library/macos/lib")
-        //         .display()
-        // );
-        // println!("cargo:rustc-link-lib=static=ippcp");
-        config.include("rocksdb/plugin/openssl/include");
-        lib_sources.push("plugin/openssl/openssl_provider.cc");
-        let dir = env::var("CARGO_MANIFEST_DIR").unwrap();
-        println!(
-            "cargo:rustc-link-search=dependency={}",
-            Path::new(&dir)
-                //.join("rocksdb/plugin/ippcp/library/macos/lib")
-                .display()
-        );
-        println!("cargo:rustc-link-lib=static=crypto");
     } else if target.contains("android") {
         config.define("OS_ANDROID", None);
         config.define("ROCKSDB_PLATFORM_POSIX", None);
@@ -211,18 +214,6 @@ fn build_rocksdb() {
         println!("cargo:rustc-link-arg=-lrt");
         println!("cargo:rustc-link-arg=-ldl");
         config.flag("-fno-builtin-memcmp");
-
-        // on linux we use the IPPCP plugin of rocksdb for the crypto (the lib is precompiled)
-        config.include("rocksdb/plugin/ippcp/library/include");
-        lib_sources.push("plugin/ippcp/ippcp_provider.cc");
-        let dir = env::var("CARGO_MANIFEST_DIR").unwrap();
-        println!(
-            "cargo:rustc-link-search=native={}",
-            Path::new(&dir)
-                .join("rocksdb/plugin/ippcp/library/linux/lib")
-                .display()
-        );
-        println!("cargo:rustc-link-lib=static=ippcp");
     } else if target.contains("freebsd") {
         config.flag("-march=haswell");
         config.define("OS_FREEBSD", None);
@@ -249,14 +240,17 @@ fn build_rocksdb() {
         config.define("NOMINMAX", None);
         config.define("ROCKSDB_WINDOWS_UTF8_FILENAMES", None);
 
-        let dir = env::var("CARGO_MANIFEST_DIR").unwrap();
-        println!(
-            "cargo:rustc-link-search=native={}",
-            Path::new(&dir)
-                .join("rocksdb/plugin/ippcp/library/win")
-                .display()
-        );
-        println!("cargo:rustc-link-lib=static=ippcpmt");
+        // Got some errors while using IPPCP plugin on windows.
+        // switching to openssl
+
+        // let dir = env::var("CARGO_MANIFEST_DIR").unwrap();
+        // println!(
+        //     "cargo:rustc-link-search=native={}",
+        //     Path::new(&dir)
+        //         .join("rocksdb/plugin/ippcp/library/win")
+        //         .display()
+        // );
+        // println!("cargo:rustc-link-lib=static=ippcpmt");
 
         if &target == "x86_64-pc-windows-gnu" {
             // Tell MinGW to create localtime_r wrapper of localtime_s function.
