@@ -8,7 +8,7 @@
 
 #if !defined(ROCKSDB_LITE)
 
-#include <crypto/evp.h>
+#include <openssl/evp.h>
 #include <rocksdb/env_encryption.h>
 
 #include <string>
