@@ -146,7 +146,11 @@ fn build_rocksdb() {
     }
 
     if !target.contains("darwin") && !target.contains("linux") {
-        config.include("rocksdb/plugin/openssl/include");
+        if let Some(include) = std::env::var_os("DEP_OPENSSL_INCLUDE") {
+            config.include(include);
+        } else {
+            config.include("rocksdb/plugin/openssl/include");
+        }
         lib_sources.push("plugin/openssl/openssl_provider.cc");
         // let dir = env::var("CARGO_MANIFEST_DIR").unwrap();
         // println!(
@@ -231,7 +235,7 @@ fn build_rocksdb() {
         config.flag("-fno-builtin-memcmp");
         config.define("_REENTRANT", None);
         // config.include("rocksdb/plugin/openssl/include");
-        // lib_sources.push("plugin/openssl/openssl_provider.cc");
+        lib_sources.push("plugin/openssl/openssl_provider.cc");
         // let dir = env::var("CARGO_MANIFEST_DIR").unwrap();
         // println!("cargo:rustc-link-lib=static=crypto");
     } else if target.contains("windows") {
