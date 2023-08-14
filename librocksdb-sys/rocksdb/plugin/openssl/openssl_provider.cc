@@ -100,7 +100,6 @@ class OpensslCipherStream : public BlockAccessCipherStream {
   const EVP_CIPHER *aes_cipher_;
   const unsigned char* key_;
   char init_vector_[kBlockSize];
-  EVP_CIPHER_CTX* ctx_;
 
   Status handleErrors(const char * str);
 };
@@ -108,24 +107,25 @@ class OpensslCipherStream : public BlockAccessCipherStream {
 OpensslCipherStream::OpensslCipherStream(const EVP_CIPHER *aes_cipher,
                                      const unsigned char* key,
                                      const char* init_vector)
-    : aes_cipher_(aes_cipher), key_(key), ctx_(nullptr) {
+    : aes_cipher_(aes_cipher), key_(key) {
     memcpy(init_vector_,init_vector,kBlockSize);
-    ctx_ = EVP_CIPHER_CTX_new();
+    //ctx_ = EVP_CIPHER_CTX_new();
 }
 
 OpensslCipherStream::~OpensslCipherStream() {
   //EVP_CIPHER_free(aes_cipher_);
-  if (ctx_ != nullptr) EVP_CIPHER_CTX_free(ctx_);
+  //if (ctx_ != nullptr) EVP_CIPHER_CTX_free(ctx_);
 }
 
 Status OpensslCipherStream::handleErrors(const char * str) {
   # ifndef OPENSSL_NO_STDIO
   ERR_print_errors_fp(stderr);
   # endif
-  if (ctx_ != nullptr) { 
-    EVP_CIPHER_CTX_free(ctx_);
-    ctx_ = nullptr;
-  }
+
+  // if (ctx_ != nullptr) { 
+  //   EVP_CIPHER_CTX_free(ctx_);
+  //   ctx_ = nullptr;
+  // }
   return Status::Aborted(str);
 }
 
@@ -143,7 +143,10 @@ Status OpensslCipherStream::Encrypt(uint64_t fileOffset, char* data,
                                   size_t dataSize) {
   if (dataSize == 0) return Status::OK();
 
-  if ( 1 != EVP_CIPHER_CTX_reset(ctx_)) { return handleErrors("Failed to reset context."); }
+  const char * err_str = nullptr;
+
+  EVP_CIPHER_CTX* ctx_ = EVP_CIPHER_CTX_new();
+  // if ( 1 != EVP_CIPHER_CTX_reset(ctx_)) { err_str="Failed to reset context."; goto error; }
 
   size_t index = fileOffset / kBlockSize;
   size_t offset = fileOffset % kBlockSize;
@@ -184,12 +187,12 @@ Status OpensslCipherStream::Encrypt(uint64_t fileOffset, char* data,
 
   int len;
 
-  if( 1 != EVP_EncryptInit_ex(ctx_, aes_cipher_, NULL, key_, ctr_block)) return handleErrors("Failed to init cipher.");
+  if( 1 != EVP_EncryptInit_ex(ctx_, aes_cipher_, NULL, key_, ctr_block)) {err_str="Failed to init cipher."; goto error;}
   EVP_CIPHER_CTX_set_padding(ctx_, 0);
 
   if (offset == 0) {
     //unsigned char *out = (unsigned char*)malloc(dataSize);
-    if( 1 != EVP_EncryptUpdate(ctx_, reinterpret_cast<unsigned char *>(data), &len, reinterpret_cast<const unsigned char *>(data), static_cast<int>(dataSize))) return handleErrors("Failed to encrypt.");
+    if( 1 != EVP_EncryptUpdate(ctx_, reinterpret_cast<unsigned char *>(data), &len, reinterpret_cast<const unsigned char *>(data), static_cast<int>(dataSize))) {err_str="Failed to encrypt."; goto error;}
     //memcpy(data, out, dataSize);
     //EVP_EncryptFinal_ex(ctx_, reinterpret_cast<unsigned char *>(data) + len, &len);
 
@@ -197,7 +200,7 @@ Status OpensslCipherStream::Encrypt(uint64_t fileOffset, char* data,
     
     unsigned char zero_block[kBlockSize]{0};
     //unsigned char zero_block_out[kBlockSize]{0};
-    if( 1 != EVP_EncryptUpdate(ctx_, zero_block, &len, zero_block, static_cast<int>(kBlockSize))) return handleErrors("Failed to encrypt zero block.");
+    if( 1 != EVP_EncryptUpdate(ctx_, zero_block, &len, zero_block, static_cast<int>(kBlockSize))) {err_str="Failed to encrypt zero block."; goto error;}
     //unsigned char * end = reinterpret_cast<unsigned char *>(zero_block) + len;
 
     size_t n = std::min(kBlockSize - offset, dataSize);
@@ -208,7 +211,7 @@ Status OpensslCipherStream::Encrypt(uint64_t fileOffset, char* data,
     if (dataSize > n) {
       char* ptr = (char*)(data + n);
       //unsigned char *out = (unsigned char*)malloc(dataSize - n);
-      if( 1 != EVP_EncryptUpdate(ctx_, reinterpret_cast<unsigned char *>(ptr), &len, reinterpret_cast<const unsigned char *>(ptr), static_cast<int>(dataSize - n))) return handleErrors("Failed to encrypt remaining.");
+      if( 1 != EVP_EncryptUpdate(ctx_, reinterpret_cast<unsigned char *>(ptr), &len, reinterpret_cast<const unsigned char *>(ptr), static_cast<int>(dataSize - n))) {err_str="Failed to encrypt remaining."; goto error;}
       //memcpy(ptr, out, dataSize - n);
       //end = reinterpret_cast<unsigned char *>(ptr) + len;
     }
@@ -216,7 +219,16 @@ Status OpensslCipherStream::Encrypt(uint64_t fileOffset, char* data,
     //EVP_EncryptFinal_ex(ctx_, end, &len);
   }
 
+  if (ctx_ != nullptr) EVP_CIPHER_CTX_free(ctx_);
+
   return Status::OK();
+
+  error:
+    if (ctx_ != nullptr) EVP_CIPHER_CTX_free(ctx_);
+    ERR_print_errors_fp(stderr);
+    if (err_str != nullptr) return Status::Aborted(err_str);
+    else return Status::Aborted("unknown error");
+
 }
 
 Status OpensslCipherStream::Decrypt(uint64_t fileOffset, char* data,
