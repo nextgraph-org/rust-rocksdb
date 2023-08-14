@@ -119,7 +119,9 @@ OpensslCipherStream::~OpensslCipherStream() {
 }
 
 Status OpensslCipherStream::handleErrors(const char * str) {
+  # ifndef OPENSSL_NO_STDIO
   ERR_print_errors_fp(stderr);
+  # endif
   if (ctx_ != nullptr) { 
     EVP_CIPHER_CTX_free(ctx_);
     ctx_ = nullptr;
@@ -228,7 +230,9 @@ std::unique_ptr<EncryptionProvider> OpensslProvider::CreateProvider() {
 }
 
 Status OpensslProvider::handleErrors (const char * str) const {
+  # ifndef OPENSSL_NO_STDIO
   ERR_print_errors_fp(stderr);
+  # endif
   return Status::Aborted(str);
 }
 
