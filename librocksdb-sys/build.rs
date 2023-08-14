@@ -201,6 +201,7 @@ fn build_rocksdb() {
         config.define("ROCKSDB_PLATFORM_POSIX", None);
         config.define("ROCKSDB_LIB_IO_POSIX", None);
         config.define("OPENSSL_NO_STDIO", None);
+        config.define("ANDROID_STL", "c++_shared");
         config.define("_REENTRANT", None);
         config.flag("-fno-builtin-memcmp");
     } else if target.contains("linux") {
