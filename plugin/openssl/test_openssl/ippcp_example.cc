@@ -21,12 +21,12 @@ std::string kDBPath = "/tmp/oss_aes_example";
 
 int main() {
 
-  std::unique_ptr<EncryptionProvider> provider = OpensslProvider::CreateProvider();
-  provider->AddCipher("", "a6d2ae2816157e2b3c4fcf098815f7xb", 32, false);
-  char prefixb[4096];
-  Slice ps = Slice(prefixb, 4096);
-  provider->CreateNewPrefix("",prefixb,4096);
-  Status s;
+  //std::unique_ptr<EncryptionProvider> provider = OpensslProvider::CreateProvider();
+  //provider->AddCipher("", "a6d2ae2816157e2b3c4fcf098815f7xb", 32, false);
+  //char prefixb[4096];
+  //Slice ps = Slice(prefixb, 4096);
+  //provider->CreateNewPrefix("",prefixb,4096);
+  //Status s;
     // const EnvOptions envoptions;
     // std::unique_ptr<BlockAccessCipherStream> s;
     // provider->CreateCipherStream("",envoptions,ps,&s);
@@ -210,8 +210,9 @@ int main() {
   setbuf(stdout, NULL);
   printf("writing 1M records...");
   WriteOptions w_opts;
-  for (int i = 0; i < 1000000; ++i) {
-    status = db->Put(w_opts, std::to_string(i), std::to_string(i * i));
+  int offset = 0;
+  for (int i = offset+0; i < 1000000+offset; ++i) {
+    status = db->Put(w_opts, std::to_string(i), std::to_string(i ));
     assert(status.ok());
   }
   db->Flush(FlushOptions());
@@ -223,15 +224,15 @@ int main() {
   for (int i = 0; i < 1000000; ++i) {
     status = db->Get(r_opts, std::to_string(i), &value);
     assert(status.ok());
-    assert(value == std::to_string(i * i));
+    assert(value == std::to_string(i ));
   }
   printf("done.\n");
 
   // Close database
   status = db->Close();
   assert(status.ok());
-  status = DestroyDB(kDBPath, dboptions);
-  assert(status.ok());
+  //status = DestroyDB(kDBPath, dboptions);
+  //assert(status.ok());
 
   return 0;
 }

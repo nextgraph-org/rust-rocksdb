@@ -1,6 +1,6 @@
 include ../../../make_config.mk
 
-PLATFORM_LDFLAGS += -lrocksdb -lcrypto -L../../.. -L../../../../rust-rocksdb/target/debug/build/openssl-sys-019f70ebcbe84526/out/openssl-build/install/lib/	
+PLATFORM_LDFLAGS += -lrocksdb -lcrypto -L../../.. 
 .PHONY: clean
 
 all: ippcp_example
