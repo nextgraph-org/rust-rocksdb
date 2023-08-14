@@ -18,7 +18,6 @@
 
 #include "openssl_provider.h"
 
-#include <emmintrin.h>
 #include <rocksdb/utilities/object_registry.h>
 #include "rocksdb/utilities/customizable_util.h"
 #include <memory>
