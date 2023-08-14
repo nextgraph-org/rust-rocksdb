@@ -145,7 +145,7 @@ fn build_rocksdb() {
         // the flag has been moved to the darwin. openbsd, freebsd and linux cases below
     }
 
-    if target.contains("darwin") || (target.contains("linux" && !target.contains("android"))) {
+    if target.contains("darwin") || (target.contains("linux") && !target.contains("android")) {
         // on macos and linux we use the IPPCP plugin of rocksdb for the crypto (the lib is precompiled)
         config.include("rocksdb/plugin/ippcp/library/include");
         lib_sources.push("plugin/ippcp/ippcp_provider.cc");
