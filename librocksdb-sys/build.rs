@@ -157,7 +157,7 @@ fn build_rocksdb() {
                 .display()
         );
         println!("cargo:rustc-link-lib=static=ippcp");
-    } else if !target.contains("openbsd") {
+    } else {//if !target.contains("openbsd") {
         if let Some(include) = std::env::var_os("DEP_OPENSSL_INCLUDE") {
             config.include(include);
         } else {
@@ -237,10 +237,10 @@ fn build_rocksdb() {
         println!("cargo:rustc-link-arg=-pthread");
         config.flag("-fno-builtin-memcmp");
         config.define("_REENTRANT", None);
-        pkg_config::Config::new().probe("openssl").unwrap();
-        // config.include("rocksdb/plugin/openssl/include");
-        lib_sources.push("plugin/openssl/openssl_provider.cc");
-        config.flag("-lcrypto");
+        //pkg_config::Config::new().probe("openssl").unwrap();
+        //// config.include("rocksdb/plugin/openssl/include");
+        //lib_sources.push("plugin/openssl/openssl_provider.cc");
+        //config.flag("-lcrypto");
         // let dir = env::var("CARGO_MANIFEST_DIR").unwrap();
         // println!("cargo:rustc-link-lib=static=crypto");
     } else if target.contains("windows") {
