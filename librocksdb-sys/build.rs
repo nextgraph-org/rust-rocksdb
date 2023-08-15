@@ -234,13 +234,11 @@ fn build_rocksdb() {
         config.define("ROCKSDB_PLATFORM_POSIX", None);
         config.define("ROCKSDB_LIB_IO_POSIX", None);
         println!("cargo:rustc-link-arg=-pthread");
-        println!("cargo:rustc-link-lib=static=z");
         println!("cargo:rustc-link-lib=static=execinfo");
         println!("cargo:rustc-link-lib=static=crypto");
         config.flag("-fno-builtin-memcmp");
         config.flag_if_supported("-faligned-new");
         config.flag("-Wshorten-64-to-32");
-        config.define("ZLIB", None);
         config.define("ROCKSDB_BACKTRACE", None);
         config.define("HAVE_UINT128_EXTENSION", None);
         config.define("DHAVE_ALIGNED_NEW", None);
