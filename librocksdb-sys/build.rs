@@ -229,7 +229,7 @@ fn build_rocksdb() {
         config.flag("-fno-builtin-memcmp");
         config.define("_REENTRANT", None);
     } else if target.contains("openbsd") {
-        config.flag("-march=haswell");
+        //config.flag("-march=haswell");
         config.define("OS_OPENBSD", None);
         config.define("ROCKSDB_PLATFORM_POSIX", None);
         config.define("ROCKSDB_LIB_IO_POSIX", None);
