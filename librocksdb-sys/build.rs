@@ -157,7 +157,8 @@ fn build_rocksdb() {
                 .display()
         );
         println!("cargo:rustc-link-lib=static=ippcp");
-    } else {//if !target.contains("openbsd") {
+    } else {
+        //if !target.contains("openbsd") {
         if let Some(include) = std::env::var_os("DEP_OPENSSL_INCLUDE") {
             config.include(include);
         } else {
@@ -172,8 +173,7 @@ fn build_rocksdb() {
         //         .display()
         // );
         // println!("cargo:rustc-link-lib=static=crypto");
-    } else {
-    }
+    } 
 
     if target.contains("apple-ios") {
         config.define("OS_MACOSX", None);
