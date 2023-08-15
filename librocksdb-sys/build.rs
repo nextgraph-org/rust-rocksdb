@@ -234,8 +234,9 @@ fn build_rocksdb() {
         config.define("ROCKSDB_PLATFORM_POSIX", None);
         config.define("ROCKSDB_LIB_IO_POSIX", None);
         println!("cargo:rustc-link-arg=-pthread");
-        println!("cargo:rustc-link-arg=-lz");
-        println!("cargo:rustc-link-arg=-lexecinfo");
+        println!("cargo:rustc-link-lib=static=z");
+        println!("cargo:rustc-link-lib=static=execinfo");
+        println!("cargo:rustc-link-lib=static=crypto");
         config.flag("-fno-builtin-memcmp");
         config.flag_if_supported("-faligned-new");
         config.flag("-Wshorten-64-to-32");
@@ -247,7 +248,7 @@ fn build_rocksdb() {
         //pkg_config::Config::new().probe("openssl").unwrap();
         config.include("rocksdb/plugin/openssl/include");
         lib_sources.push("plugin/openssl/openssl_provider.cc");
-        config.flag("-lcrypto");
+        
         // let dir = env::var("CARGO_MANIFEST_DIR").unwrap();
         // println!("cargo:rustc-link-lib=static=crypto");
     } else if target.contains("windows") {
