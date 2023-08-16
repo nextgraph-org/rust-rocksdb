@@ -191,28 +191,28 @@ Status OpensslCipherStream::Encrypt(uint64_t fileOffset, char* data,
   EVP_CIPHER_CTX_set_padding(ctx_, 0);
 
   if (offset == 0) {
-    //unsigned char *out = (unsigned char*)malloc(dataSize);
-    if( 1 != EVP_EncryptUpdate(ctx_, reinterpret_cast<unsigned char *>(data), &len, reinterpret_cast<const unsigned char *>(data), static_cast<int>(dataSize))) {err_str="Failed to encrypt."; goto error;}
-    //memcpy(data, out, dataSize);
+    unsigned char *out = (unsigned char*)malloc(dataSize);
+    if( 1 != EVP_EncryptUpdate(ctx_, out, &len, reinterpret_cast<const unsigned char *>(data), static_cast<int>(dataSize))) {err_str="Failed to encrypt."; goto error;}
+    memcpy(data, out, dataSize);
     //EVP_EncryptFinal_ex(ctx_, reinterpret_cast<unsigned char *>(data) + len, &len);
 
   } else {
     
     unsigned char zero_block[kBlockSize]{0};
-    //unsigned char zero_block_out[kBlockSize]{0};
-    if( 1 != EVP_EncryptUpdate(ctx_, zero_block, &len, zero_block, static_cast<int>(kBlockSize))) {err_str="Failed to encrypt zero block."; goto error;}
+    unsigned char zero_block_out[kBlockSize]{0};
+    if( 1 != EVP_EncryptUpdate(ctx_, zero_block_out, &len, zero_block, static_cast<int>(kBlockSize))) {err_str="Failed to encrypt zero block."; goto error;}
     //unsigned char * end = reinterpret_cast<unsigned char *>(zero_block) + len;
 
     size_t n = std::min(kBlockSize - offset, dataSize);
-    for (size_t i = 0; i < n; ++i) data[i] ^= zero_block[offset + i];
-    memset(zero_block, 0, kBlockSize);
+    for (size_t i = 0; i < n; ++i) data[i] ^= zero_block_out[offset + i];
+    //memset(zero_block, 0, kBlockSize);
 
     n = kBlockSize - offset;
     if (dataSize > n) {
       char* ptr = (char*)(data + n);
-      //unsigned char *out = (unsigned char*)malloc(dataSize - n);
-      if( 1 != EVP_EncryptUpdate(ctx_, reinterpret_cast<unsigned char *>(ptr), &len, reinterpret_cast<const unsigned char *>(ptr), static_cast<int>(dataSize - n))) {err_str="Failed to encrypt remaining."; goto error;}
-      //memcpy(ptr, out, dataSize - n);
+      unsigned char *out = (unsigned char*)malloc(dataSize - n);
+      if( 1 != EVP_EncryptUpdate(ctx_, out, &len, reinterpret_cast<const unsigned char *>(ptr), static_cast<int>(dataSize - n))) {err_str="Failed to encrypt remaining."; goto error;}
+      memcpy(ptr, out, dataSize - n);
       //end = reinterpret_cast<unsigned char *>(ptr) + len;
     }
 
