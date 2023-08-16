@@ -256,12 +256,12 @@ Status OpensslProvider::AddCipher(const std::string& /*descriptor*/,
     return Status::InvalidArgument("Multiple encryption keys not supported.");
   }
 
-  key_ = reinterpret_cast<const unsigned char *>(cipher);
-
   if (len == 16) {  aes_cipher_ = EVP_aes_128_ctr(); }
   else if (len == 24) { aes_cipher_ = EVP_aes_192_ctr(); }
   else if (len == 32) { aes_cipher_ = EVP_aes_256_ctr(); }
   else return Status::InvalidArgument("Invalid key size in provider.");
+
+  memcpy(key_,cipher,len);
 
   //if( 1 != EVP_CIPHER_up_ref(aes_cipher_)) return handleErrors("Failed to create provider.");
 

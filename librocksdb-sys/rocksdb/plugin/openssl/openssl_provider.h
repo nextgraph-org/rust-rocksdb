@@ -48,10 +48,11 @@ class OpensslProvider : public EncryptionProvider {
 
  private:
   const EVP_CIPHER *aes_cipher_;
-  const unsigned char *key_;
+  //const unsigned char *key_;
+  unsigned char key_[32];
   size_t key_len_;
   OpensslProvider()
-      : aes_cipher_(nullptr), key_(nullptr), key_len_(0) {}
+      : aes_cipher_(nullptr), key_len_(0) {}
   OpensslProvider(const OpensslProvider&) = delete;
   OpensslProvider& operator=(const OpensslProvider&) = delete;
   Status handleErrors (const char * str) const;
