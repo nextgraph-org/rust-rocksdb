@@ -270,7 +270,7 @@ Status OpensslProvider::AddCipher(const std::string& /*descriptor*/,
 
 Status OpensslProvider::CreateNewPrefix(const std::string& /*fname*/,
                                       char* prefix, size_t prefixLength) const {
-  if (1 != RAND_bytes(reinterpret_cast<unsigned char *>(prefix), static_cast<int>(prefixLength)) ){
+  if (1 != RAND_bytes(reinterpret_cast<unsigned char *>(prefix), static_cast<int>(OpensslCipherStream::kBlockSize)) ){
     return handleErrors("Failed to get random numbers.");//Status::Aborted(ERR_reason_error_string(ERR_get_error()));
   }
   //if( 1 != EVP_CIPHER_up_ref(aes_cipher_)) return handleErrors("Failed to create OpensslCipherStream.");
