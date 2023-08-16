@@ -150,10 +150,15 @@ fn build_rocksdb() {
         config.include("rocksdb/plugin/ippcp/library/include");
         lib_sources.push("plugin/ippcp/ippcp_provider.cc");
         let dir = env::var("CARGO_MANIFEST_DIR").unwrap();
+        let prebuild_lib = if target.contains("darwin") {
+            "macos"
+        } else {
+            "linux"
+        };
         println!(
             "cargo:rustc-link-search=native={}",
             Path::new(&dir)
-                .join("rocksdb/plugin/ippcp/library/macos/lib")
+                .join(format!("rocksdb/plugin/ippcp/library/{prebuild_lib}/lib"))
                 .display()
         );
         println!("cargo:rustc-link-lib=static=ippcp");
@@ -172,7 +177,7 @@ fn build_rocksdb() {
         //         .display()
         // );
         // println!("cargo:rustc-link-lib=static=crypto");
-    } 
+    }
 
     if target.contains("apple-ios") {
         config.define("OS_MACOSX", None);
