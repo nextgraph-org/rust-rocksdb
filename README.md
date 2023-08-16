@@ -1,61 +1,29 @@
-# rust-rocksdb
+## RocksDB: A Persistent Key-Value Store for Flash and RAM Storage
 
-![RocksDB build](https://github.com/rust-rocksdb/rust-rocksdb/workflows/RocksDB%20build/badge.svg?branch=master)
-[![crates.io](https://img.shields.io/crates/v/rocksdb.svg)](https://crates.io/crates/rocksdb)
-[![documentation](https://docs.rs/rocksdb/badge.svg)](https://docs.rs/rocksdb)
-[![license](https://img.shields.io/crates/l/rocksdb.svg)](https://github.com/rust-rocksdb/rust-rocksdb/blob/master/LICENSE)
-[![Gitter chat](https://badges.gitter.im/rust-rocksdb/gitter.png)](https://gitter.im/rust-rocksdb/lobby)
-![rust 1.60.0 required](https://img.shields.io/badge/rust-1.60.0-blue.svg?label=MSRV)
+[![CircleCI Status](https://circleci.com/gh/facebook/rocksdb.svg?style=svg)](https://circleci.com/gh/facebook/rocksdb)
 
-![GitHub commits (since latest release)](https://img.shields.io/github/commits-since/rust-rocksdb/rust-rocksdb/latest.svg)
+RocksDB is developed and maintained by Facebook Database Engineering Team.
+It is built on earlier work on [LevelDB](https://github.com/google/leveldb) by Sanjay Ghemawat (sanjay@google.com)
+and Jeff Dean (jeff@google.com)
 
-## Requirements
+This code is a library that forms the core building block for a fast
+key-value server, especially suited for storing data on flash drives.
+It has a Log-Structured-Merge-Database (LSM) design with flexible tradeoffs
+between Write-Amplification-Factor (WAF), Read-Amplification-Factor (RAF)
+and Space-Amplification-Factor (SAF). It has multi-threaded compactions,
+making it especially suitable for storing multiple terabytes of data in a
+single database.
 
-- Clang and LLVM
+Start with example usage here: https://github.com/facebook/rocksdb/tree/main/examples
 
-### On OpenBSD
+See the [github wiki](https://github.com/facebook/rocksdb/wiki) for more explanation.
 
-```
-pkg_add llvm
-```
+The public interface is in `include/`.  Callers should not include or
+rely on the details of any other header files in this package.  Those
+internal APIs may be changed without warning.
 
-### On macos
+Questions and discussions are welcome on the [RocksDB Developers Public](https://www.facebook.com/groups/rocksdb.dev/) Facebook group and [email list](https://groups.google.com/g/rocksdb) on Google Groups.
 
-```
-port install clang
-```
+## License
 
-### On windows
-
-download from [here](https://github.com/llvm/llvm-project/releases/download/llvmorg-16.0.0/LLVM-16.0.0-win64.exe)
-
-## Contributing
-
-Feedback and pull requests welcome! If a particular feature of RocksDB is
-important to you, please let me know by opening an issue, and I'll
-prioritize it.
-
-## Compression Support
-
-By default, support for the [Snappy](https://github.com/google/snappy),
-[LZ4](https://github.com/lz4/lz4), [Zstd](https://github.com/facebook/zstd),
-[Zlib](https://zlib.net), and [Bzip2](http://www.bzip.org) compression
-is enabled through crate features. If support for all of these compression
-algorithms is not needed, default features can be disabled and specific
-compression algorithms can be enabled. For example, to enable only LZ4
-compression support, make these changes to your Cargo.toml:
-
-```
-[dependencies.rocksdb]
-default-features = false
-features = ["lz4"]
-```
-
-## Multithreaded ColumnFamily alternation
-
-The underlying RocksDB does allow column families to be created and dropped
-from multiple threads concurrently. But this crate doesn't allow it by default
-for compatibility. If you need to modify column families concurrently, enable
-crate feature called `multi-threaded-cf`, which makes this binding's
-data structures to use RwLock by default. Alternatively, you can directly create
-`DBWithThreadMode<MultiThreaded>` without enabling the crate feature.
+RocksDB is dual-licensed under both the GPLv2 (found in the COPYING file in the root directory) and Apache 2.0 License (found in the LICENSE.Apache file in the root directory).  You may select, at your option, one of the above-listed licenses.
