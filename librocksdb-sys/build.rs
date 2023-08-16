@@ -229,12 +229,14 @@ fn build_rocksdb() {
         config.flag("-fno-builtin-memcmp");
         config.define("_REENTRANT", None);
     } else if target.contains("openbsd") {
-        //config.flag("-march=haswell");
+        config.flag("-march=haswell");
         config.define("OS_OPENBSD", None);
         config.define("ROCKSDB_PLATFORM_POSIX", None);
         config.define("ROCKSDB_LIB_IO_POSIX", None);
+        //config.define("ZLIB", None);
         println!("cargo:rustc-link-arg=-pthread");
-        //println!("cargo:rustc-link-lib=execinfo");
+        println!("cargo:rustc-link-lib=execinfo");
+        //println!("cargo:rustc-link-lib=z");
         println!("cargo:rustc-link-lib=crypto");
         config.flag("-fno-builtin-memcmp");
         config.flag_if_supported("-faligned-new");
@@ -243,12 +245,8 @@ fn build_rocksdb() {
         config.define("HAVE_UINT128_EXTENSION", None);
         config.define("DHAVE_ALIGNED_NEW", None);
         config.define("_REENTRANT", None);
-        //pkg_config::Config::new().probe("openssl").unwrap();
         config.include("rocksdb/plugin/openssl/include");
         lib_sources.push("plugin/openssl/openssl_provider.cc");
-        
-        // let dir = env::var("CARGO_MANIFEST_DIR").unwrap();
-        // println!("cargo:rustc-link-lib=static=crypto");
     } else if target.contains("windows") {
         link("rpcrt4", false);
         link("shlwapi", false);
