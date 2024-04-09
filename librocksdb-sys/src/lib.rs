@@ -16,6 +16,7 @@
 #![allow(non_camel_case_types)]
 #![allow(non_snake_case)]
 #![allow(non_upper_case_globals)]
+#![allow(deref_nullptr)]
 
 // Ensure the libraries are linked in, despite it not being used directly
 #[cfg(feature = "bzip2")]
@@ -24,7 +25,7 @@ extern crate bzip2_sys;
 extern crate libz_sys;
 #[cfg(feature = "lz4")]
 extern crate lz4_sys;
-#[cfg(not(any(target_os = "linux", target_os = "macos",target_os="openbsd")))]
+#[cfg(not(any(target_os = "linux", target_os = "macos", target_os = "openbsd")))]
 extern crate openssl;
 #[cfg(feature = "zstd")]
 extern crate zstd_sys;
