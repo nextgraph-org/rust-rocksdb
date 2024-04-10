@@ -206,7 +206,7 @@ void rocksdb_transactiondb_flush_cfs_with_status(
     rocksdb_transactiondb_t* db, const rocksdb_flushoptions_t* options,
     rocksdb_column_family_handle_t** column_families, int num_column_families,
     rocksdb_status_t* statusptr) {
-  vector<ColumnFamilyHandle*> column_family_handles(num_column_families);
+  std::vector<ColumnFamilyHandle*> column_family_handles(num_column_families);
   for (int i = 0; i < num_column_families; i++) {
     column_family_handles[i] = column_families[i]->rep;
   }
