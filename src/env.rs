@@ -49,7 +49,7 @@ impl Env {
         }
     }
 
-    /// Returns encrypted env. they key must be a 32 bytes long array of u8
+    /// Returns encrypted env. the key must be a 32 bytes long array of u8
     pub fn enc_env(key: [u8; 32]) -> Result<Self, Error> {
         let env = unsafe { ffi::rocksdb_create_encrypted_env(opt_bytes_to_ptr(Some(&key))) };
         if env.is_null() {

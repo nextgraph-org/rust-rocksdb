@@ -11,6 +11,8 @@ fn link(name: &str, bundled: bool) {
             let dir = var("CARGO_MANIFEST_DIR").unwrap();
             println!("cargo:rustc-link-search=native={}/{}", dir, target[0]);
         }
+    } else if target.get(2) == Some(&"darwin") {
+        println!("cargo:rustc-link-arg=-mmacosx-version-min=10.14");
     }
 }
 
