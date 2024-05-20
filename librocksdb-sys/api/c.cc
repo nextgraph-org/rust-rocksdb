@@ -1,4 +1,3 @@
-#include "../rocksdb/db/c.cc"
 #include "../rocksdb/include/rocksdb/version.h"
 #include <cstring>
 #include "c.h"
