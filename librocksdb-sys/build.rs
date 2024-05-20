@@ -27,14 +27,14 @@ fn fail_on_empty_directory(name: &str) {
 fn rocksdb_include_dir() -> String {
     match env::var("ROCKSDB_INCLUDE_DIR") {
         Ok(val) => val,
-        Err(_) => "rocksdb/include".to_string(),
+        Err(_) => "librocksdb-sys/rocksdb/include".to_string(),
     }
 }
 
 fn bindgen_rocksdb() {
     let bindings = bindgen::Builder::default()
         .header(rocksdb_include_dir() + "/rocksdb/c.h")
-        .header("api/c.h")
+        .header("librocksdb-sys/api/c.h")
         .derive_debug(false)
         .blocklist_type("max_align_t") // https://github.com/rust-lang-nursery/rust-bindgen/issues/550
         .ctypes_prefix("libc")
@@ -55,9 +55,9 @@ fn build_rocksdb() {
     let target = env::var("TARGET").unwrap();
 
     let mut config = cc::Build::new();
-    config.include("rocksdb/include/");
-    config.include("rocksdb/");
-    config.include("rocksdb/third-party/gtest-1.8.1/fused-src/");
+    config.include("librocksdb-sys/rocksdb/include/");
+    config.include("librocksdb-sys/rocksdb/");
+    config.include("librocksdb-sys/rocksdb/third-party/gtest-1.8.1/fused-src/");
 
     if cfg!(feature = "snappy") {
         config.define("SNAPPY", Some("1"));
@@ -68,7 +68,7 @@ fn build_rocksdb() {
 
     if cfg!(feature = "lz4") {
         config.define("LZ4", Some("1"));
-        config.include("lz4/");
+        config.include("librocksdb-sys/lz4/");
     }
 
     if cfg!(feature = "zstd") {
@@ -96,7 +96,7 @@ fn build_rocksdb() {
         config.define("USE_RTTI", Some("1"));
     }
 
-    config.include(".");
+    config.include("librocksdb-sys");
     config.define("NDEBUG", Some("1"));
 
     let mut lib_sources = include_str!("rocksdb_lib_sources.txt")
@@ -152,7 +152,7 @@ fn build_rocksdb() {
 
     if target.contains("darwin") || (target.contains("linux") && !target.contains("android")) {
         // on macos and linux we use the IPPCP plugin of rocksdb for the crypto (the lib is precompiled)
-        config.include("rocksdb/plugin/ippcp/library/include");
+        config.include("librocksdb-sys/rocksdb/plugin/ippcp/library/include");
         lib_sources.push("plugin/ippcp/ippcp_provider.cc");
         let dir = env::var("CARGO_MANIFEST_DIR").unwrap();
         let prebuild_lib = if target.contains("darwin") {
@@ -163,7 +163,9 @@ fn build_rocksdb() {
         println!(
             "cargo:rustc-link-search=native={}",
             Path::new(&dir)
-                .join(format!("rocksdb/plugin/ippcp/library/{prebuild_lib}/lib"))
+                .join(format!(
+                    "librocksdb-sys/rocksdb/plugin/ippcp/library/{prebuild_lib}/lib"
+                ))
                 .display()
         );
         println!("cargo:rustc-link-lib=static=ippcp");
@@ -171,7 +173,7 @@ fn build_rocksdb() {
         if let Some(include) = std::env::var_os("DEP_OPENSSL_INCLUDE") {
             config.include(include);
         } else {
-            config.include("rocksdb/plugin/openssl/include");
+            config.include("librocksdb-sys/rocksdb/plugin/openssl/include");
         }
         lib_sources.push("plugin/openssl/openssl_provider.cc");
         // let dir = env::var("CARGO_MANIFEST_DIR").unwrap();
@@ -255,7 +257,7 @@ fn build_rocksdb() {
         config.define("HAVE_UINT128_EXTENSION", None);
         config.define("DHAVE_ALIGNED_NEW", None);
         config.define("_REENTRANT", None);
-        config.include("rocksdb/plugin/openssl/include");
+        config.include("librocksdb-sys/rocksdb/plugin/openssl/include");
         lib_sources.push("plugin/openssl/openssl_provider.cc");
     } else if target.contains("windows") {
         link("rpcrt4", false);
@@ -362,11 +364,11 @@ fn build_rocksdb() {
     }
 
     for file in lib_sources {
-        config.file(format!("rocksdb/{file}"));
+        config.file(format!("librocksdb-sys/rocksdb/{file}"));
     }
 
-    config.file("build_version.cc");
-    config.file("api/c.cc");
+    config.file("librocksdb-sys/build_version.cc");
+    config.file("librocksdb-sys/api/c.cc");
 
     config.cpp(true);
     config.flag_if_supported("-std=c++17");
@@ -457,7 +459,7 @@ fn update_submodules() {
 }
 
 fn main() {
-    if !Path::new("rocksdb/AUTHORS").exists() {
+    if !Path::new("librocksdb-sys/rocksdb/AUTHORS").exists() {
         update_submodules();
     }
     let target = env::var("TARGET").unwrap();
@@ -470,8 +472,8 @@ fn main() {
     bindgen_rocksdb();
 
     if !try_to_find_and_link_lib("ROCKSDB") {
-        println!("cargo:rerun-if-changed=rocksdb/");
-        fail_on_empty_directory("rocksdb");
+        println!("cargo:rerun-if-changed=librocksdb-sys/rocksdb/");
+        fail_on_empty_directory("librocksdb-sys/rocksdb");
         build_rocksdb();
     } else {
         let target = env::var("TARGET").unwrap();

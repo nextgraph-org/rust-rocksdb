@@ -133,6 +133,8 @@ pub use crate::{
     write_batch::{WriteBatch, WriteBatchIterator, WriteBatchWithTransaction},
 };
 
+pub mod librocksdb_sys;
+
 pub use librocksdb_sys as ffi;
 
 use std::error;

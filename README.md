@@ -1,13 +1,6 @@
-# rust-rocksdb
+# ng-rocksdb
 
-![RocksDB build](https://github.com/rust-rocksdb/rust-rocksdb/workflows/RocksDB%20build/badge.svg?branch=master)
-[![crates.io](https://img.shields.io/crates/v/rocksdb.svg)](https://crates.io/crates/rocksdb)
-[![documentation](https://docs.rs/rocksdb/badge.svg)](https://docs.rs/rocksdb)
-[![license](https://img.shields.io/crates/l/rocksdb.svg)](https://github.com/rust-rocksdb/rust-rocksdb/blob/master/LICENSE)
-[![Gitter chat](https://badges.gitter.im/rust-rocksdb/gitter.png)](https://gitter.im/rust-rocksdb/lobby)
-![rust 1.60.0 required](https://img.shields.io/badge/rust-1.60.0-blue.svg?label=MSRV)
-
-![GitHub commits (since latest release)](https://img.shields.io/github/commits-since/rust-rocksdb/rust-rocksdb/latest.svg)
+This is a fork of https://github.com/rust-rocksdb/rust-rocksdb that also includes a subtree of a fork of https://github.com/facebook/rocksdb for the needs of NextGraph.org project.
 
 ## Requirements
 
@@ -44,12 +37,6 @@ is enabled through crate features. If support for all of these compression
 algorithms is not needed, default features can be disabled and specific
 compression algorithms can be enabled. For example, to enable only LZ4
 compression support, make these changes to your Cargo.toml:
-
-```
-[dependencies.rocksdb]
-default-features = false
-features = ["lz4"]
-```
 
 ## Multithreaded ColumnFamily alternation
 
