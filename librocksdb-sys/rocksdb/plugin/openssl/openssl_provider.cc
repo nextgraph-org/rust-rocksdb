@@ -225,7 +225,9 @@ Status OpensslCipherStream::Encrypt(uint64_t fileOffset, char* data,
 
   error:
     if (ctx_ != nullptr) EVP_CIPHER_CTX_free(ctx_);
+    # ifndef OPENSSL_NO_STDIO
     ERR_print_errors_fp(stderr);
+    # endif
     if (err_str != nullptr) return Status::Aborted(err_str);
     else return Status::Aborted("unknown error");
 
