@@ -3,12 +3,12 @@
 #include <cstring>
 #include "c.h"
 
-// static char* CopyString(const std::string& str) {
-//   char* result = reinterpret_cast<char*>(malloc(sizeof(char) * str.size()+1));
-//   memcpy(result, str.data(), sizeof(char) * str.size());
-//   result[sizeof(char) * str.size()] = 0;
-//   return result;
-// }
+static char* CopyString2(const std::string& str) {
+  char* result = reinterpret_cast<char*>(malloc(sizeof(char) * str.size()+1));
+  memcpy(result, str.data(), sizeof(char) * str.size());
+  result[sizeof(char) * str.size()] = 0;
+  return result;
+}
 
 static bool SaveStatus(rocksdb_status_t* target, const Status source) {
   target->code = static_cast<rocksdb_status_code_t>(source.code());
@@ -30,7 +30,7 @@ extern "C" {
 
 char* rocksdb_version() {
   auto name = ROCKSDB_NAMESPACE::GetRocksVersionAsString(true);
-  return CopyString(name);
+  return CopyString2(name);
 }
 
 rocksdb_pinnableslice_t* rocksdb_get_pinned_cf_with_status(

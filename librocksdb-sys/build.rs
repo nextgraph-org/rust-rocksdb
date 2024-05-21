@@ -472,7 +472,7 @@ fn main() {
     bindgen_rocksdb();
 
     if !try_to_find_and_link_lib("ROCKSDB") {
-        println!("cargo:rerun-if-changed=librocksdb-sys/rocksdb/");
+        println!("cargo:rerun-if-changed=librocksdb-sys/");
         fail_on_empty_directory("librocksdb-sys/rocksdb");
         build_rocksdb();
     } else {
