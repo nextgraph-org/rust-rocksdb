@@ -72,7 +72,7 @@
     clippy::from_over_into,
 )]
 
-#[cfg(all(not(doc), NG_ROCKS_DB_NOT_FOUND))]
+#[cfg(all(not(docsrs), NG_ROCKS_DB_NOT_FOUND))]
 std::compile_error!("empty librocksdb-sys/rocksdb directory");
 
 #[macro_use]
