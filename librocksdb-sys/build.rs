@@ -438,6 +438,7 @@ fn cxx_standard() -> String {
     })
 }
 
+#[allow(dead_code)]
 fn update_submodules() {
     let program = "git";
     let dir = "../";
@@ -461,6 +462,9 @@ fn update_submodules() {
 fn main() {
     if !Path::new("librocksdb-sys/rocksdb/AUTHORS").exists() {
         println!("cargo:rustc-cfg=NG_ROCKS_DB_NOT_FOUND");
+        if std::env::var("DOCS_RS").is_ok() {
+            println!("cargo:rustc-cfg=DOCS_RS");
+        }
         return;
         //update_submodules();
     }
