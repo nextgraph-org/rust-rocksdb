@@ -460,7 +460,9 @@ fn update_submodules() {
 
 fn main() {
     if !Path::new("librocksdb-sys/rocksdb/AUTHORS").exists() {
-        update_submodules();
+        println!("cargo:rustc-cfg=NG_ROCKS_DB_NOT_FOUND");
+        return;
+        //update_submodules();
     }
     let target = env::var("TARGET").unwrap();
     if target.contains("openbsd") {
