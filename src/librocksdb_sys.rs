@@ -25,7 +25,7 @@ extern crate bzip2_sys;
 extern crate libz_sys;
 #[cfg(feature = "lz4")]
 extern crate lz4_sys;
-#[cfg(not(any(target_os = "linux", target_os = "macos", target_os = "openbsd")))]
+#[cfg(not(any(target_os = "openbsd")))]
 extern crate openssl;
 #[cfg(feature = "zstd")]
 extern crate zstd_sys;
