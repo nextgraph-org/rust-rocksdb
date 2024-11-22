@@ -150,26 +150,27 @@ fn build_rocksdb() {
         // the flag has been moved to the darwin. openbsd, freebsd and linux cases below
     }
 
-    if target.contains("darwin") || (target.contains("linux") && !target.contains("android")) {
-        // on macos and linux we use the IPPCP plugin of rocksdb for the crypto (the lib is precompiled)
-        config.include("librocksdb-sys/rocksdb/plugin/ippcp/library/include");
-        lib_sources.push("plugin/ippcp/ippcp_provider.cc");
-        let dir = env::var("CARGO_MANIFEST_DIR").unwrap();
-        let prebuild_lib = if target.contains("darwin") {
-            "macos"
-        } else {
-            "linux"
-        };
-        println!(
-            "cargo:rustc-link-search=native={}",
-            Path::new(&dir)
-                .join(format!(
-                    "librocksdb-sys/rocksdb/plugin/ippcp/library/{prebuild_lib}/lib"
-                ))
-                .display()
-        );
-        println!("cargo:rustc-link-lib=static=ippcp");
-    } else if !target.contains("openbsd") {
+    // if target.contains("darwin") || (target.contains("linux") && !target.contains("android")) {
+    //     // on macos and linux we use the IPPCP plugin of rocksdb for the crypto (the lib is precompiled)
+    //     config.include("librocksdb-sys/rocksdb/plugin/ippcp/library/include");
+    //     lib_sources.push("plugin/ippcp/ippcp_provider.cc");
+    //     let dir = env::var("CARGO_MANIFEST_DIR").unwrap();
+    //     let prebuild_lib = if target.contains("darwin") {
+    //         "macos"
+    //     } else {
+    //         "linux"
+    //     };
+    //     println!(
+    //         "cargo:rustc-link-search=native={}",
+    //         Path::new(&dir)
+    //             .join(format!(
+    //                 "librocksdb-sys/rocksdb/plugin/ippcp/library/{prebuild_lib}/lib"
+    //             ))
+    //             .display()
+    //     );
+    //     println!("cargo:rustc-link-lib=static=ippcp");
+    // } else
+    if !target.contains("openbsd") {
         if let Some(include) = std::env::var_os("DEP_OPENSSL_INCLUDE") {
             config.include(include);
         } else {
