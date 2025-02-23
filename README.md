@@ -6,6 +6,8 @@ This is a fork of https://github.com/rust-rocksdb/rust-rocksdb that also include
 
 - Clang and LLVM
 
+https://rust-lang.github.io/rust-bindgen/requirements.html
+
 ### On OpenBSD
 
 ```
